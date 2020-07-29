@@ -1,0 +1,108 @@
+red in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+####################loss###################
+overall 0.48009917 
+############ Test set statistics#################
+mean 0.19198381602098766
+median 0.0
+std 1.4340438552027224
+############ prediction statistics#################
+mean 0.00011236236942960994
+median 9.047285275300967e-05
+std 0.00045191740878920933
+#################### confusion matrixes ###############
+Confusion matrx for the 0.1 quantile
+pred_rain_was_rain:2038pred_rain_wasnt_rain:17718pred_no_rain_was_rain:11859pred_no_rain_wasnt_rain:143070
+Confusion matrx for the 0.3 quantile
+pred_rain_was_rain:4914pred_rain_wasnt_rain:54610pred_no_rain_was_rain:8983pred_no_rain_wasnt_rain:106178
+Confusion matrx for the 0.5 quantile
+pred_rain_was_rain:7190pred_rain_wasnt_rain:78478pred_no_rain_was_rain:6707pred_no_rain_wasnt_rain:82310
+Confusion matrx for the 0.7 quantile
+pred_rain_was_rain:10162pred_rain_wasnt_rain:123579pred_no_rain_was_rain:3735pred_no_rain_wasnt_rain:37209
+Confusion matrx for the 0.9 quantile
+pred_rain_was_rain:13521pred_rain_wasnt_rain:157955pred_no_rain_was_rain:376pred_no_rain_wasnt_rain:2833
+#################### POD ###############
+0.1 quantile: 0.0
+0.3 quantile: 0.0
+0.5 quantile: 0.0
+0.7 quantile: 0.0
+0.9 quantile: 0.009
+0.9 mean: 0.0
+#################### FAR ###############
+0.1 quantile: 0.947
+0.3 quantile: 0.9
+0.5 quantile: 1.0
+0.7 quantile: 0.891
+0.9 quantile: 0.717
+0.9 mean: 1.0
+#################### CSI ###############
+0.1 quantile: 0.0
+0.3 quantile: 0.0
+0.5 quantile: 0.0
+0.7 quantile: 0.0
+0.9 quantile: 0.009
+0.9 mean: 0.0
+#################### bias ###############
+0.1 quantile: -0.19216194533135808
+0.3 quantile: -0.1920357247180475
+0.5 quantile: -0.19196832302066855
+0.7 quantile: -0.19191471414149805
+0.9 quantile: -0.19137894767835337
+ bias: -0.19187145365155805
+#################### MSE ###############
+0.1 quantile: 2.0935369968461894
+0.3 quantile: 2.0934122323874926
+0.5 quantile: 2.093330491366782
+0.7 quantile: 2.0932734950935403
+0.9 quantile: 2.0928780286860973
+#################### MAE ###############
+0.1 quantile: 0.19219138226692364
+0.3 quantile: 0.19209885753551886
+0.5 quantile: 0.19205972440487717
+0.7 quantile: 0.1920647799018052
+0.9 quantile: 0.19245841473275718
+mean MSE: 2.093271665426426
+median MSE: 8.600909837206688e-09
+std MSE : 74.28665305358527
+mean MAE : 0.1920857737250304
+median MAE : 9.274109033867721e-05 
+std MAE : 1.4340065275161347
+the mean total MSE is [2.09327167]
+the mean total MAE is [0.19208577]
+################### CI ##################
+CI length variance: 4.847064e-06
+CI length mean: 0.0007829977
+CI length median: 0.00046778767
+################## kvota ####################3
+[1.01783252]
+[0.55766199]
+2.3732804918124992e-07
+0.0005117210083472025
+################## correlations ################
+distance between 5 quantile and true vaule and label size: 0.9999998562957266
+same as above but for the a priori mean as predictior : 0.99804126834751
+correlation target prediction: [0.01926659]
+################# interval lengths #######
+0.0007829977050208232
+####################### CRPS ########################
+mean crps over the whole intevals: 0.00018723983567526888
+mean crps over the whole intevals: 2.0738132880069314e-05
+####################### No rain measures ##############
+MSE : [2.22360345e-07]
+MAE : [0.00012343]
+bias : 0.0001094129828679227
+mean CRPS : 0.00013119732759501673
+median CRPS : 1.9136283226544036e-05
+CI length variance: 4.6190526e-06
+CI length mean: 0.00073924114
+CI length median: 0.00046585876
+####################### rain ocurencies measures ##############
+MSE : [26.31237858]
+MAE : [2.41308607]
+bias : -2.413086074391004
+CRPS : 0.000835650484679196
+median CRPS : 0.00038967380416579547
+CI length variance: 7.206697e-06
+CI length mean: 0.0012892614
+CI length median: 0.0005015945
+
