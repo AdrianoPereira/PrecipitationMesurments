@@ -30,7 +30,7 @@ model.fit(
     x_val=x_val,
     y_val=y_val[:, 3, 3],
     batch_size=batch_size,
-    maximum_epochs=500
+    maximum_epochs=epochs
 )
 
 model.save(f'{OUTPUT}/mlp_model_new_data_trained.h5')
