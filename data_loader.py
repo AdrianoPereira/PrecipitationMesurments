@@ -3,6 +3,11 @@
 Created on Fri Feb  7 15:52:46 2020
 
 @author: gustav
+
+This file contains functions mostly for creating the datasets of geostationary images collocated with the GPM labels.
+the code is poorly commented and instead of trying to clean everything up I thought it would be a better idea to 
+let you have the code and then just let me know what parts of the code is of interest and I will be happy to 
+clean those sections up. Just contact me at g.tellwe@gmail.com.
 """
 
 # Constants
@@ -16,6 +21,7 @@ lons = []
 lats = []
 oldFile = ""
 folder_path = 'E:/Precipitation_mesurments'
+
 
 def downloadReferenceDataFromFTPServer():
     from ftplib import FTP
@@ -45,6 +51,7 @@ def downloadReferenceDataFromFTPServer():
         file.close()
     
     ftp.quit()
+    
 def getFilesForHour(DATE):
     
     '''
@@ -57,8 +64,13 @@ def getFilesForHour(DATE):
     PATH_Storage = 'ABI-L1b-RadF/%s' % (DATE.strftime('%Y/%j/%H')) 
     
     return bucket.list_blobs(prefix = PATH_Storage)
+
 def getMiddleTime(FILE):
+    '''
+        returns the middle time of the GEOES full time scan
+    '''
     import datetime
+    
     middleTimeDifference =(datetime.datetime.strptime(FILE.split('_')[4], 'e%Y%j%H%M%S%f')-datetime.datetime.strptime(FILE.split('_')[3], 's%Y%j%H%M%S%f')).total_seconds()
     return (datetime.datetime.strptime(FILE.split('_')[3], 's%Y%j%H%M%S%f')+datetime.timedelta(0, int(middleTimeDifference/2)))
 
@@ -66,7 +78,7 @@ def getClosestFile(DATE, CHANNEL):
     from datetime import datetime, timedelta
     import numpy as np
     '''
-    Returns the filepath closest to the DATE object
+        Returns the filepath closest to the DATE object
     
     '''
     files_for_hour = list(map(lambda x : x.name, getFilesForHour(DATE)))
@@ -87,71 +99,14 @@ def getClosestFile(DATE, CHANNEL):
     
     # get the file before and after as well
     index_closest_file = np.argmin(date_diff[:,0])
-    #print("the file")
-    #print(files_for_hour[index_closest_file])
-    '''
-    if index_closest_file == 0 and DATE.hour == 0:
-        day_of_year = DATE.timetuple().tm_yday
-        day_before = datetime(DATE.year, 1, 1,23) + timedelta(day_of_year - 2)
-        #print("here")
-        #print(day_before)
-        #datetime(DATE.year,DATE.day-1,23)
-        files_for_hour_before = list(map(lambda x : x.name, getFilesForHour(day_before)))
-        files_for_hour_before = [file for file in files_for_hour_before if file.split('_')[1][-3:] == CHANNEL ]
-        if len(files_for_hour_before) == 0:
-            print(day_before)
-        #print(files_for_hour_before)
-        file_before = files_for_hour_before[-1]
-    elif index_closest_file == 0:
-       
-        hour_before = datetime(DATE.year,DATE.month,DATE.day, DATE.hour -1)
-        files_for_hour_before = list(map(lambda x : x.name, getFilesForHour(hour_before)))
-        files_for_hour_before = [file for file in files_for_hour_before if file.split('_')[1][-3:] == CHANNEL ]
-        if len(files_for_hour_before) == 0:
-            print(hour_before)
-        file_before = files_for_hour_before[-1]
-        #print("here1")
-        #print(hour_before)
-        #print(files_for_hour_before)
-    else:
-        
-        file_before = files_for_hour[index_closest_file-1]
-        #print("here2")
-        #print(file_before)
     
-    if index_closest_file == len(files_for_hour)-1 and DATE.hour == 23:
-        day_of_year = DATE.timetuple().tm_yday
-        day_after = datetime(DATE.year, 1, 1,23) + timedelta(day_of_year)
-        #day_after = datetime(DATE.year,DATE.day+1,0)
-        files_for_hour_after = list(map(lambda x : x.name, getFilesForHour(day_after)))
-        files_for_hour_after = [file for file in files_for_hour_after if file.split('_')[1][-3:] == CHANNEL ]
-        if len(files_for_hour_after) == 0:
-            print(day_after)
-        file_after = files_for_hour_after[0]
-        #print("here10")
-        #print( day_after)
-    elif index_closest_file == len(files_for_hour)-1:
-        hour_after = datetime(DATE.year,DATE.month,DATE.day,DATE.hour +1)
-        files_for_hour_after = list(map(lambda x : x.name, getFilesForHour(hour_after)))
-        files_for_hour_after = [file for file in files_for_hour_after if file.split('_')[1][-3:] == CHANNEL ]
-        if len(files_for_hour_after) == 0:
-            print(hour_after)
-            
-        file_after = files_for_hour_after[0]
-        #print("here3")
-        #print(hour_after)
-    else:
-        file_after = files_for_hour[index_closest_file+1]
-        #print("here4")
-        #print(file_after)
-        
-    '''
     return '%s' % (files_for_hour[index_closest_file]), getMiddleTime(files_for_hour[np.argmin(date_diff[:,0])]) 
 
     #return '%s' % (file_before),'%s' % (files_for_hour[index_closest_file]),'%s' % (file_after), getMiddleTime(files_for_hour[np.argmin(date_diff[:,0])]) 
 
 def get_timestamp(file):
     return getMiddleTime(file)
+
 def create_list_of_files(CHANNEL):
     from datetime import datetime, timedelta
     from linkedlist import SLinkedList, Node
@@ -159,7 +114,7 @@ def create_list_of_files(CHANNEL):
     import pickle
     
     '''
-    function for creating a linked list with all the file name sorted by time
+    function for creating a linked list with all the file name sorted by time. saves the results in a text file
     '''
     
     current_date = datetime(2017,8,1)
@@ -324,6 +279,7 @@ def extractGeoData(filePATH, prev_sat_h = 0, prev_sat_lon = 0, prev_sat_sweep = 
     return lons,lats,C,rad, x_data, y_data
 
 #def getIndexOfGeoDataMatricFromLongitudeLatitude(longitude, latitude, sat_h, sat_lon, sat_sweep, x_data,y_data):
+    
 def getIndexOfGeoDataMatricFromLongitudeLatitude(longitude, latitude,proj, x_data,y_data):
     # project the longitude and latitude to geostationary references
     from pyproj import Proj
@@ -1130,9 +1086,9 @@ def getTrainingData(dataSize, nmb_GPM_pass, GPM_resolution):
             3: rain amount
     '''
     start_time = time.time()
-    GPM_image, GPM_pos_time = getGPMDataImage(datetime.datetime(2017,8,5), dataSize)
-    #GPM_data= getGPMData(datetime.datetime(2017,8,5),dataSize,nmb_GPM_pass,GPM_resolution)
-    times[:,0] = GPM_pos_time[:,2]
+    #GPM_image, GPM_pos_time = getGPMDataImage(datetime.datetime(2017,8,5), dataSize)
+    GPM_data = getGPMData(datetime.datetime(2017,8,5),dataSize,nmb_GPM_pass,GPM_resolution)
+    times[:,0] = GPM_data[:,2]
     end_time = time.time()
     
     print("time for collecting GPM Data %s" % (end_time-start_time))
@@ -1141,18 +1097,18 @@ def getTrainingData(dataSize, nmb_GPM_pass, GPM_resolution):
     '''
     start_time = time.time()
     
-    tmp_x, tmp_time, tmp_distance =  getGEOData(GPM_pos_time,'C13')
+    tmp_x, tmp_time, tmp_distance =  getGEOData( GPM_data,'C13')
     xData[:,0,:,:] =tmp_x
     times[:,1] =tmp_time
     distance[:,0] =tmp_distance
     
     #xData[:,1,:,:], times[:,2], distance[:,1] = getGEOData(np.reshape(GPM_pos_time_data, (GPM_pos_time_data.shape[0]*GPM_pos_time_data.shape[2]*GPM_pos_time_data.shape[3],GPM_pos_time_data.shape[1])),'C08')
-    tmp_x, tmp_time, tmp_distance =  getGEOData(GPM_pos_time,'C08')
+    tmp_x, tmp_time, tmp_distance =  getGEOData( GPM_data,'C08')
     xData[:,1,:,:] = tmp_x
     times[:,2] = tmp_time
     distance[:,1] = tmp_distance
     
-    yData = GPM_image
+    yData =  GPM_data[:,3]
     end_time = time.time()
     
     print("time for collecting GEO Data %s" % (end_time-start_time))
@@ -1627,6 +1583,7 @@ def load_data(set_nmb):
 
     #tmpXData = np.zeros((len(xData),100,100,2))
     #tmpXData = np.zeros((len(xData),28,28,2))
+    
     if set_nmb == 2:
         tmpXData = np.zeros((1,28,28,2))
     elif set_nmb == 1:

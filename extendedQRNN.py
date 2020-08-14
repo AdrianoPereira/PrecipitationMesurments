@@ -1,4 +1,8 @@
-
+'''
+this code is originally from the typhoon package https://github.com/atmtools/typhon/blob/master/typhon/retrieval/qrnn/qrnn.py 
+and developed by Simon Pfreundschuh. It was later altered by Gustav Tellwe to use CNN arcitecture instead of MLP. Not all of the
+orininal documentation is thus valid and the biggest change is the addition of a model name to specify the CNN structure.
+'''
 import copy
 import logging
 import os
@@ -6,7 +10,7 @@ import pickle
 
 import numpy as np
 from scipy.interpolate import CubicSpline
-from Models import unet,convLSTM
+# from Models import unet,convLSTM
 
 # Keras Imports
 try:
@@ -470,13 +474,13 @@ class QRNN:
             activation = 'relu'
             start_kernels = 32
             drop = 0.3
-            input1 = Input( shape = (28,28,2))
+            input1 = Input( shape = input_dim)
             input2 = Input( shape = (4,) )
             #conv_model = Sequential()
             tmp_input = input1
         
             tmp_input = Conv2D(64, kernel_size=(3,3),
-                             input_shape = (28,28,2),
+                             input_shape = input_dim,
                              padding = 'same',
                              activation = activation)(tmp_input)
             tmp_input = Conv2D(64, kernel_size=(3,3),
@@ -535,24 +539,13 @@ class QRNN:
             
             model = Sequential()
             
-            model.add(Dense(256, activation = 'relu',input_shape=(28*28*2+4,)))
-            for i in range(7):
-                model.add(Dense(256, activation = 'relu'))
+            model.add(Dense(width, activation = activation,input_shape=input_dim))
+            for i in range(depth -2):
+                model.add(Dense(width, activation = activation))
                 
-            model.add(Dense(5))
-        elif depth == 0:
-            model.add(Dense(input_dim=input_dim,
-                            units=len(quantiles),
-                            activation=None))
-        else:
-            model.add(Dense(input_dim=input_dim,
-                            units=width,
-                            activation='relu'))
-            for i in range(depth - 2):
-                model.add(Dense(units=width,
-                                activation='relu',
-                                **kwargs))
-            model.add(Dense(units=len(quantiles), activation=None))
+            model.add(Dense(len(quantiles)))
+            
+       
         
         print('add')
         self.models = [clone_model(model) for i in range(ensemble_size)]
@@ -763,6 +756,7 @@ class QRNN:
 
         self.custom_objects = {loss.__name__: loss}
         for model in self.models:
+            
             optimizer = SGD(lr=ilr)
             #optimizer = Adagrad()
             #optimizer = Adam()
