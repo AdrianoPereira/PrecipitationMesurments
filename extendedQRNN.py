@@ -46,38 +46,30 @@ def skewed_absolute_error(y_true, y_pred, tau):
     return K.mean((1.0 - tau) * K.relu(dy) + tau * K.relu(-dy), axis=-1)
 
 
+#def quantile_loss(y_true, y_pred, taus, model_name):
 def quantile_loss(y_true, y_pred, taus):
+ 
     """
     The quantiles loss for a list of quantiles. Sums up the error contribution
-    from the each of the quantile loss functions.
+    from the each of the quantile loss functions. If you want to train a unet,
+    please use the unet loss below
     """
-    #print(y_true.shape)
-    #print(y_true)
-    #print(y_pred)
-    #e=0
-    #print(K.int_shape(y_pred))
-    #y_true = K.flatten(y_true)
+    # unet loss
+    e = skewed_absolute_error(K.flatten(y_true), K.flatten(y_pred[:,:,:,0]), taus[0])
+    for i, tau in enumerate(taus[1:]):
+            e += skewed_absolute_error(K.flatten(y_true),
+                                       K.flatten(y_pred[:,:,:, i + 1]),
+                                       tau)
     
-    #y_pred = K.reshape(y_pred,(*K.int_shape(y_pred)[1]*K.int_shape(y_pred)[2],K.int_shape(y_pred)[3]))
+    # CNN and MLP Loss
+    ''''
     e = skewed_absolute_error(K.flatten(y_true), K.flatten(y_pred[:, 0]), taus[0])
     for i, tau in enumerate(taus[1:]):
             e += skewed_absolute_error(K.flatten(y_true),
                                        K.flatten(y_pred[:, i + 1]),
                                        tau)
     '''
-    for i in range(7):
-        for j in range(7):
-            
-            tmp_y_pred = y_pred[:,i,j,:]
-            tmp_y_true = y_true[:,i,j]
-            
-            e += skewed_absolute_error(
-                K.flatten(tmp_y_true), K.flatten(tmp_y_pred[:, 0]), taus[0])
-            for i, tau in enumerate(taus[1:]):
-                e += skewed_absolute_error(K.flatten(tmp_y_true),
-                                           K.flatten(tmp_y_pred[:, i + 1]),
-                                           tau)
-    '''
+    
     return e
 
 
@@ -91,12 +83,15 @@ class QuantileLoss:
                    this loss function.
     """
 
+    
     def __init__(self, quantiles):
         self.__name__ = "QuantileLoss"
         self.quantiles = quantiles
+        
 
     def __call__(self, y_true, y_pred):
-        print(y_true.shape)
+        
+
         return quantile_loss(y_true, y_pred, self.quantiles)
 
     def __repr__(self):
@@ -152,6 +147,7 @@ class DataGenerator(keras.utils.Sequence):
     
         
         y_batch = self.y_data[indexes]
+       
 
         return (x_data_batch, y_batch)
 class TrainingGenerator:
@@ -467,7 +463,7 @@ class QRNN:
         if model_name == 'convLSTM':
             model = convLSTM()
         elif model_name == 'unet':
-            model = unet(input_size = (112,112,2))
+            model = unet(input_size = input_dim)
         elif model_name == 'CNN':
             momentum = 0.9
             epsilon = 0.001
@@ -545,6 +541,11 @@ class QRNN:
                 
             model.add(Dense(len(quantiles)))
             
+<<<<<<< HEAD
+=======
+            print(model.summary())
+            
+>>>>>>> ba9711bb5cfac6a4f59302c875726e0465c21093
        
         
         print('add')
@@ -752,6 +753,7 @@ class QRNN:
         #n = x_train.shape[0]
         #n_train = n
        
+        #loss = QuantileLoss(self.quantiles, self.model_name)
         loss = QuantileLoss(self.quantiles)
 
         self.custom_objects = {loss.__name__: loss}
@@ -775,9 +777,13 @@ class QRNN:
                                 validation_steps=1, callbacks=[lr_callback])
             
             '''
+            
             model.fit_generator(training_generator, 
                                 epochs=me, validation_data=validation_generator,
                                 callbacks=[lr_callback])
+            
+            
+        
             
             
     def predict(self, x):

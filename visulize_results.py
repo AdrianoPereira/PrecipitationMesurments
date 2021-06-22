@@ -943,8 +943,8 @@ def get_apriori_mean_estimate_kvote(y_test,y_train, mean):
 def get_apriori_median_estimate_kvote(y_test,y_train, mean):
     import numpy as np
     a_priori_mean = np.mean(y_train)
-    MSE_a_priori_mean =np.zeros((len(y_train),1))
-    MSE_mean = np.zeros((len(y_train),1))
+    MSE_a_priori_mean =np.zeros((len(y_test),1))
+    MSE_mean = np.zeros((len(y_test),1))
     
     for i in range(len(y_test)):
         MSE_a_priori_mean[i] = (a_priori_mean-y_test[i])*(a_priori_mean-y_test[i])
@@ -1387,7 +1387,10 @@ def generate_all_results(model,xTest, yTest,yTrain ,quantiles, save, folder_path
     print("CI length median: %s" % np.median(prediction[no_rain_indexes,-1]-prediction[no_rain_indexes,0])) 
     
 def generate_all_results_unet(model,xTest, yTest,yTrain ,quantiles, save, folder_path, case):
+    
     import numpy as np
+    import tensorflow as tf
+    import matplotlib.pyplot as plt
     if save:
         # predict
         prediction = model.predict(xTest)
@@ -1415,72 +1418,37 @@ def generate_all_results_unet(model,xTest, yTest,yTrain ,quantiles, save, folder
     mean = np.reshape(mean, (len(mean)*100*100,1)) 
     yTest = np.reshape(yTest, (len(yTest)*100*100,1))
     yTrain = np.reshape(yTrain, (len(yTrain)*100*100,1))
-    '''
-    size = 5
-    y_pred = prediction
-    y_test = yTest
-    y_cdf = np.zeros((y_pred.shape[0], size + 2))
-    y_cdf[:, 1:-1] = y_pred
-    y_cdf[:, 0] = 2.0 * y_pred[:, 1] - y_pred[:, 2]
-    y_cdf[:, -1] = 2.0 * y_pred[:, -2] - y_pred[:, -3]
+    crps = calculate_crps(prediction, yTest, quantiles)
     
-    ind = np.zeros(y_cdf.shape)
-    ind[y_cdf > y_test.reshape(-1, 1)] = 1.0
-
-    qs = np.zeros((1, size + 2))
-    qs[0, 1:-1] = quantiles
-    qs[0, 0] = 0.0
-    qs[0, -1] = 1.0
-    integrand = (qs - ind)**2.0
-    
-    for i in range(len(y_cdf)):
-        indexes = np.argsort(y_cdf[i,:])
-        y_cdf[i,:] = y_cdf[i,indexes]
-        integrand[i,:] = integrand[i,:]
-        
-        
-    crps =  np.trapz(integrand, y_cdf)
-    '''
-    #loss_tmp = loss(yTest, prediction)
-    #CI = np.abs(prediction[:,0]-prediction[:,-1])
-    #error = np.zeros((len(yTest),1))
-    #for i in range(len(yTest)):
-    #    error[i] = np.abs(mean[i]-yTest[i])
-    
-    #error = np.abs(mean-yTest)
-    #print(correlation_target_prediction(CI, crps))
-    #print(correlation_target_prediction(CI, loss_tmp))
-    #print(correlation_target_prediction(error, crps))
-    #print(correlation_target_prediction(error, loss_tmp))
-    #plt.hist(crps)
-    #plt.show()
-    #plt.hist(loss_tmp)
+   
+  
     ## plots
-    #generateQQPLot(quantiles, yTest, prediction, case)
-    #scatterplot(mean, yTest,case)
-    #histogram_plot(mean, yTest, case,folder_path, [0,20])
-    #histogram_plot(mean, yTest, case,folder_path, [0,0.5])
+    generateQQPLot(quantiles, yTest, prediction, case)
+    scatterplot(mean, yTest,case)
+    histogram_plot(mean, yTest, case,folder_path, [0,20])
+    histogram_plot(mean, yTest, case,folder_path, [0,0.5])
     #scatterplot_zoom(mean, yTest,case)
-    #containsTrueValueIntervals(quantiles, yTest, prediction, 1,folder_path,case)
-    #CISizeDistribution(prediction, case)
-    #getCIsizeFractionPlot(prediction, yTest,case, 0.0001, 20)
-    #getCIsizeFractionPlot(prediction, yTest,case, 0.05, 200)
-    #plotLabelSizeVsCISize(prediction, yTest, 1, case, folder_path)
-    #generateCRPSIntervalPlot(crps,quantiles, yTest, prediction, 1)
-    #pltCRPSPerIntervalSize(crps,quantiles, yTest, prediction, case, 0.5, 20)
-    #generate_qqplot_for_intervals(quantiles, yTest, prediction, 1)
-    #plotIntervalPredictions(yTest, mean, 1)
-    #plot_small_pred_histograms(mean, yTest, case)
-    #print("####################loss###################")
+    containsTrueValueIntervals(quantiles, yTest, prediction, 1,folder_path,case)
+    CISizeDistribution(prediction, case)
+    getCIsizeFractionPlot(prediction, yTest,case, 0.0001, 20, folder_path)
+    getCIsizeFractionPlot(prediction, yTest,case, 0.5, 20, folder_path)
+    plotLabelSizeVsCISize(prediction, yTest, 1, case, folder_path)
+    generateCRPSIntervalPlot(crps,quantiles, yTest, prediction, 1)
+    pltCRPSPerIntervalSize(crps,quantiles, yTest, prediction, case, 0.5, 20)
+    generate_qqplot_for_intervals(quantiles, yTest, prediction, 1)
+    plotIntervalPredictions(yTest, mean, 1)
+    plot_small_pred_histograms(mean, yTest, case)
+    
+    print("####################loss###################")
     #rain_indexes = np.where(yTest >0)[0]
     #no_rain_idnexes = np.where(yTest==0)[0]
-    print(np.mean(loss(yTest, prediction)))
     
     #pltLossPerIntervalSize(quantiles, yTest, prediction, case, 0.5, 20)
-    #print("overall %s " % tf.Session().run(quantile_loss(np.float32(yTest), prediction, quantiles)))      
+    print("overall %s " % np.mean(tf.compat.v1.Session().run(quantile_loss(np.float32(yTest), prediction, quantiles))))      
     #print("rain %s " % tf.Session().run(quantile_loss(np.float32(yTest[rain_indexes]), prediction[rain_indexes], quantiles)))      
     #print("no_rain %s " % tf.Session().run(quantile_loss(np.float32(yTest[no_rain_idnexes]), prediction[no_rain_idnexes], quantiles)))      
-    '''
+    
+    
     print("############ Test set statistics#################")
     print("mean %s" % np.mean(yTest))
     print("median %s" % np.median(yTest))
@@ -1490,9 +1458,7 @@ def generate_all_results_unet(model,xTest, yTest,yTrain ,quantiles, save, folder
     print("mean %s" % np.mean(mean))
     print("median %s" % np.median(mean))
     print("std %s" % np.std(mean))
-    '''
     
-    '''
     
     # generate confision matrix, rain no rain
     
@@ -1535,14 +1501,24 @@ def generate_all_results_unet(model,xTest, yTest,yTrain ,quantiles, save, folder
     
     #print("the mean bias is %s" % calculate_bias(mean, yTest))
     
+    
     # get the total MSE
+    
     print("#################### MSE ###############")
     for i, quantile in enumerate(quantiles):
         print("%s quantile: %s" %(quantile, calculate_tot_MSE(prediction[:,i], yTest)))
+        #print("%s quantile: %s" %(quantile, np.mean(calculate_MSE(prediction[:,i], yTest))))
+    print("#################### MAE ###############")
+    for i, quantile in enumerate(quantiles):
+        print("%s quantile: %s" %(quantile, calculate_tot_MAE(prediction[:,i], yTest)))
+        #print("%s quantile: %s" %(quantile, np.mean(calculate_MAE(prediction[:,i], yTest))))
     
     
     mse = calculate_MSE(mean, yTest)
     mae = calculate_MAE(mean, yTest)
+   
+    
+
     print("mean MSE: %s" % np.mean(mse))
     print("median MSE: %s" %np.median(mse))
     print("std MSE : %s" % np.std(mse))
@@ -1577,11 +1553,11 @@ def generate_all_results_unet(model,xTest, yTest,yTrain ,quantiles, save, folder
     print("correlation target prediction: %s" % correlation_target_prediction(yTest, mean))
     print("################# interval lengths #######")
     print((prediction[:,-1]-prediction[:,0]).sum()/len(prediction))
-    '''
+    
     print("####################### CRPS ########################")
     print("mean crps over the whole intevals: %s" % np.mean(crps))
     print("mean crps over the whole intevals: %s" % np.median(crps))
-    '''
+    
     
    
     
@@ -1613,7 +1589,7 @@ def generate_all_results_unet(model,xTest, yTest,yTrain ,quantiles, save, folder
     print("CI length variance: %s" % np.var(prediction[no_rain_indexes,-1]-prediction[no_rain_indexes,0]))
     print("CI length mean: %s" % np.mean(prediction[no_rain_indexes,-1]-prediction[no_rain_indexes,0]))  
     print("CI length median: %s" % np.median(prediction[no_rain_indexes,-1]-prediction[no_rain_indexes,0])) 
-    '''
+  
 def generate_all_results_CNN(prediction,mean,xTest, yTest,yTrain, quantiles):
     
     import numpy as np
