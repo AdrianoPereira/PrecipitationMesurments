@@ -6,7 +6,11 @@ Created on Sat Jul 25 22:09:16 2020
 This is a script showing an example of how the models can be evaluated.
 
 """
+<<<<<<< HEAD
+from visulize_results import generate_all_results
+=======
 from visulize_results import generate_all_results,generate_all_results_unet
+>>>>>>> ba9711bb5cfac6a4f59302c875726e0465c21093
 import numpy as np
 from data_loader_preprocess import preprocess_data
 import extendedQRNN 
@@ -35,7 +39,11 @@ quantiles = [0.1, 0.3, 0.5, 0.7, 0.9]
 
 x_train, y_train, x_val, y_val, x_test, y_test = preprocess_data(xData, yData, model_name, train_set_size, val_set_size)
             
+<<<<<<< HEAD
+save = True 
+=======
 save = True
+>>>>>>> ba9711bb5cfac6a4f59302c875726e0465c21093
 case = 'CNN'
 folder_path = 'C:\\Users\\gustav\\Documents\\Sorted\\PrecipitationMesurments\\code\\results\\tmp\\'
 
@@ -54,7 +62,12 @@ example 2: MLP results
 '''
 
 # load the model and the data
+<<<<<<< HEAD
+
+model = extendedQRNN.QRNN.load('results\\MLP\\model.h5')
+=======
 model = extendedQRNN.QRNN.load('results\\adriano\\model_mlp.h5')
+>>>>>>> ba9711bb5cfac6a4f59302c875726e0465c21093
 
 # load the data from wherever you have stored it
 xData =np.load('trainingData/xDataC8C13S350000_R28_P200GPM_res3.npy')
@@ -71,6 +84,15 @@ val_set_size = 0.1
 quantiles = [0.1, 0.3, 0.5, 0.7, 0.9]
 
 x_train, y_train, x_val, y_val, x_test, y_test = preprocess_data(xData, yData,times,distance, model_name, train_set_size, val_set_size)
+<<<<<<< HEAD
+  
+save = True 
+case = 'MLP'
+folder_path = 'C:\\Users\\gustav\\Documents\\Sorted\\PrecipitationMesurments\\code\\results\\tmp2\\'
+
+generate_all_results(model,x_test, y_test[:,3,3], y_train ,quantiles, save, folder_path, case)
+
+=======
 
 save = True 
 case = 'MLP'
@@ -107,3 +129,4 @@ folder_path = 'C:\\Users\\gustav\\Documents\\Sorted\\PrecipitationMesurments\\co
 
 generate_all_results_unet(model,x_test, y_test, y_train ,quantiles, save, folder_path, case)
 
+>>>>>>> ba9711bb5cfac6a4f59302c875726e0465c21093
